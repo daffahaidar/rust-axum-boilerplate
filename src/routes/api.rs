@@ -13,6 +13,6 @@ pub fn create_router() -> Router<AppState> {
         .route("/auth/sign-in", post(sign_in))
         .route("/auth/refresh", post(refresh))
         .route("/users", get(get_users).post(create_user))
-        .route("/users/:id", put(update_user).delete(delete_user))
-        .route("/users/:id/status", patch(update_user_status))
+        .route("/users/{id}", put(update_user).delete(delete_user))
+        .route("/users/{id}/status", patch(update_user_status))
 }
