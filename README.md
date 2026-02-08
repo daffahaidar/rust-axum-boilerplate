@@ -13,48 +13,203 @@ Backend REST API menggunakan Rust + Axum dengan arsitektur Clean Architecture. S
 - ✅ PostgreSQL Database
 - ✅ Input Validation
 - ✅ Centralized Error Handling
+- ✅ Hot Reload Development
 
 ## 📋 Prerequisites
 
-- Rust (latest stable)
-- PostgreSQL
-- `sqlx-cli` (optional): `cargo install sqlx-cli`
+- **Rust** (latest stable) - [Install](https://rustup.rs/)
+- **PostgreSQL** 12+
+- **cargo-watch** (optional, untuk hot reload)
 
-## 🛠️ Setup
+## 🛠️ Setup Instructions
 
-### 1. Environment Variables
+### Linux/MacOS
 
-Copy `.env.example` ke `.env`:
+#### 1. Install Rust
 
 ```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+```
+
+#### 2. Install PostgreSQL
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+
+# MacOS (dengan Homebrew)
+brew install postgresql@15
+brew services start postgresql@15
+```
+
+#### 3. Clone & Setup Project
+
+```bash
+git clone https://github.com/daffahaidar/rust-axum-boiller.git
+cd rust-axum-boiller
+
+# Copy environment file
 cp .env.example .env
 ```
 
-Isi `.env`:
+#### 4. Setup Database
+
+```bash
+# Buat database
+createdb dimentorin
+
+# Edit .env dengan kredensial database Anda
+nano .env  # atau vim/code
+```
+
+#### 5. Install Dependencies (Optional)
+
+```bash
+# Untuk hot reload development
+cargo install cargo-watch
+```
+
+#### 6. Run Project
+
+```bash
+# Development dengan hot reload
+make dev
+
+# Atau production
+make start
+
+# Atau manual
+cargo run --release
+```
+
+---
+
+### Windows
+
+#### 1. Install Rust
+
+Download dan install dari [rustup.rs](https://rustup.rs/)
+
+Atau via PowerShell:
+
+```powershell
+# Run as Administrator
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://win.rustup.rs'))
+```
+
+#### 2. Install PostgreSQL
+
+Download dari [postgresql.org](https://www.postgresql.org/download/windows/)
+
+Atau via Chocolatey:
+
+```powershell
+choco install postgresql
+```
+
+#### 3. Clone & Setup Project
+
+```powershell
+git clone https://github.com/daffahaidar/rust-axum-boiller.git
+cd rust-axum-boiller
+
+# Copy environment file
+copy .env.example .env
+```
+
+#### 4. Setup Database
+
+Buka **pgAdmin** atau **psql**:
+
+```sql
+CREATE DATABASE dimentorin;
+```
+
+Edit `.env` dengan text editor (Notepad/VS Code):
 
 ```env
-DATABASE_URL=postgres://postgres:admin@localhost:5432/dimentorin
+DATABASE_URL=postgres://postgres:password@localhost:5432/dimentorin
 JWT_SECRET=supersecretkeyShouldChangeInProduction
 RUST_LOG=debug
 ```
 
-### 2. Database Setup
+#### 5. Install Dependencies (Optional)
 
-Buat database:
-
-```bash
-createdb dimentorin
+```powershell
+cargo install cargo-watch
 ```
 
-Aplikasi akan otomatis menjalankan migrations saat startup.
+#### 6. Run Project
 
-### 3. Run Application
+```powershell
+# Development dengan hot reload
+cargo watch -c -x run
 
-```bash
-cargo run
+# Production
+cargo run --release
 ```
 
-Server akan berjalan di `http://127.0.0.1:8000`
+**Catatan Windows:** `make` tidak tersedia secara default. Gunakan command cargo langsung atau install [make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm)
+
+---
+
+## 🔧 Development Commands
+
+### Menggunakan Make (Linux/MacOS)
+
+```bash
+make dev           # Development dengan hot reload
+make start         # Production server
+make build         # Build production binary
+make test          # Run tests
+make fmt           # Format code
+make check         # Check code
+make clean         # Clean build artifacts
+make help          # Lihat semua commands
+```
+
+### Tanpa Make (Semua Platform)
+
+```bash
+# Development dengan hot reload
+cargo watch -c -x run
+
+# Production
+cargo run --release
+
+# Build
+cargo build --release
+
+# Test
+cargo test
+
+# Format
+cargo fmt
+
+# Check
+cargo check
+```
+
+## 🌐 Environment Variables
+
+Edit file `.env`:
+
+```env
+# Database
+DATABASE_URL=postgres://username:password@localhost:5432/dimentorin
+
+# JWT Secret (PENTING: Ganti di production!)
+JWT_SECRET=supersecretkeyShouldChangeInProduction
+
+# Logging Level
+RUST_LOG=debug
+```
+
+**⚠️ SECURITY:** Jangan commit file `.env` ke Git!
 
 ## 🔐 User Roles
 
@@ -73,11 +228,10 @@ Base URL: `http://localhost:8000/api/v1`
 
 #### 1. Register User
 
-**Endpoint:** `POST /auth/sign-up`
+```bash
+POST /auth/sign-up
+Content-Type: application/json
 
-**Request Body:**
-
-```json
 {
   "name": "Daffa",
   "phone": "08123456789",
@@ -86,157 +240,47 @@ Base URL: `http://localhost:8000/api/v1`
 }
 ```
 
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "User registered successfully"
-  },
-  "results": {
-    "name": "Daffa",
-    "phone": "08123456789",
-    "email": "daffa@email.com",
-    "role": "User"
-  }
-}
-```
-
-**Validation:**
-
-- Email harus valid dan unique
-- Password minimal 8 karakter
-- Default role: `User`
-
----
-
 #### 2. Login
 
-**Endpoint:** `POST /auth/sign-in`
+```bash
+POST /auth/sign-in
+Content-Type: application/json
 
-**Request Body:**
-
-```json
 {
   "email": "daffa@email.com",
   "password": "password123"
 }
 ```
 
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "success"
-  },
-  "results": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "token_type": "Bearer",
-    "expires_in": 900
-  }
-}
-```
-
-**Token Info:**
-
-- Access Token: Expired dalam 15 menit
-- Refresh Token: Expired dalam 7 hari
-
----
-
 #### 3. Refresh Token
 
-**Endpoint:** `POST /auth/refresh`
+```bash
+POST /auth/refresh
+Content-Type: application/json
 
-**Request Body:**
-
-```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "success"
-  },
-  "results": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "token_type": "Bearer",
-    "expires_in": 900
-  }
-}
-```
-
----
-
 ### User Management Endpoints
 
-> **⚠️ Semua endpoint ini memerlukan Authorization header dengan Bearer token**
+> **⚠️ Semua endpoint ini memerlukan Authorization header**
 
-#### 4. Get All Users
+#### 4. Get All Users (Admin, SuperAdmin)
 
-**Endpoint:** `GET /users`
-
-**Headers:**
-
-```
+```bash
+GET /users
 Authorization: Bearer {access_token}
 ```
 
-**Access:** Admin, SuperAdmin
+#### 5. Create User (Admin, SuperAdmin)
 
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "success"
-  },
-  "results": [
-    {
-      "name": "Daffa",
-      "phone": "08123456789",
-      "email": "daffa@email.com",
-      "role": "User"
-    },
-    {
-      "name": "Admin User",
-      "phone": "08111111111",
-      "email": "admin@email.com",
-      "role": "Admin"
-    }
-  ]
-}
-```
-
----
-
-#### 5. Create User
-
-**Endpoint:** `POST /users`
-
-**Headers:**
-
-```
+```bash
+POST /users
 Authorization: Bearer {access_token}
-```
+Content-Type: application/json
 
-**Access:** Admin, SuperAdmin
-
-**Request Body:**
-
-```json
 {
   "name": "John Doe",
   "phone": "08123456789",
@@ -246,40 +290,13 @@ Authorization: Bearer {access_token}
 }
 ```
 
-**Response:**
+#### 6. Update User (SuperAdmin only)
 
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "User created successfully"
-  },
-  "results": {
-    "name": "John Doe",
-    "phone": "08123456789",
-    "email": "john@email.com",
-    "role": "User"
-  }
-}
-```
-
----
-
-#### 6. Update User
-
-**Endpoint:** `PUT /users/:id`
-
-**Headers:**
-
-```
+```bash
+PUT /users/{id}
 Authorization: Bearer {access_token}
-```
+Content-Type: application/json
 
-**Access:** SuperAdmin only
-
-**Request Body:**
-
-```json
 {
   "name": "Jane Doe",
   "email": "jane@email.com",
@@ -287,143 +304,28 @@ Authorization: Bearer {access_token}
 }
 ```
 
-**Note:** Semua field optional. Hanya field yang dikirim yang akan di-update.
+#### 7. Delete User (SuperAdmin only)
 
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "User updated successfully"
-  },
-  "results": {
-    "name": "Jane Doe",
-    "phone": "08123456789",
-    "email": "jane@email.com",
-    "role": "Admin"
-  }
-}
-```
-
----
-
-#### 7. Delete User
-
-**Endpoint:** `DELETE /users/:id`
-
-**Headers:**
-
-```
+```bash
+DELETE /users/{id}
 Authorization: Bearer {access_token}
 ```
 
-**Access:** SuperAdmin only
+**Note:** SuperAdmin tidak bisa menghapus akun mereka sendiri.
 
-**Restrictions:**
+#### 8. Suspend/Activate User (Admin, SuperAdmin)
 
-- SuperAdmin tidak bisa menghapus akun mereka sendiri
-- Untuk menghapus akun sendiri, minta SuperAdmin lain
-
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "User deleted successfully"
-  },
-  "results": null
-}
-```
-
----
-
-#### 8. Suspend/Activate User
-
-**Endpoint:** `PATCH /users/:id/status`
-
-**Headers:**
-
-```
+```bash
+PATCH /users/{id}/status
 Authorization: Bearer {access_token}
-```
+Content-Type: application/json
 
-**Access:** Admin, SuperAdmin
-
-**Request Body:**
-
-```json
 {
   "status": "Suspended"
 }
 ```
 
-**Valid Status:**
-
-- `Active` - User dapat login
-- `Suspended` - User di-banned, tidak bisa login
-
-**Response:**
-
-```json
-{
-  "meta": {
-    "status": "success",
-    "message": "User status updated successfully"
-  },
-  "results": {
-    "name": "John Doe",
-    "phone": "08123456789",
-    "email": "john@email.com",
-    "role": "User"
-  }
-}
-```
-
----
-
-## 📊 Access Control Matrix
-
-| Action         | User | Mentor | Admin | SuperAdmin |
-| -------------- | ---- | ------ | ----- | ---------- |
-| Register       | ✅   | ✅     | ✅    | ✅         |
-| Login          | ✅   | ✅     | ✅    | ✅         |
-| View All Users | ❌   | ❌     | ✅    | ✅         |
-| Create User    | ❌   | ❌     | ✅    | ✅         |
-| Edit User      | ❌   | ❌     | ❌    | ✅         |
-| Delete User    | ❌   | ❌     | ❌    | ✅\*       |
-| Suspend User   | ❌   | ❌     | ✅    | ✅         |
-
-\*SuperAdmin tidak dapat menghapus akun mereka sendiri
-
-## 🏗️ Architecture
-
-Project ini menggunakan **Clean Architecture** dengan pemisahan layer:
-
-```
-src/
-├── domain/           # Business logic & entities
-│   ├── entities/     # User, Role, UserStatus
-│   ├── repositories/ # Repository traits
-│   └── dtos/         # Data Transfer Objects
-├── usecases/         # Application logic
-│   ├── auth.rs       # Register, Login, Refresh
-│   ├── users.rs      # Get Users
-│   └── user_management.rs  # CRUD Users
-├── handlers/         # HTTP handlers
-│   ├── auth.rs
-│   ├── users.rs
-│   └── user_management.rs
-├── infrastructure/   # External dependencies
-│   ├── database/     # DB connection
-│   ├── repositories/ # Repository implementations
-│   ├── auth/         # JWT, Password hashing
-│   └── errors/       # Error handling
-├── routes/           # Route configuration
-├── utils/            # Helpers (validation, response)
-└── config/           # Configuration
-```
+Valid status: `Active`, `Suspended`
 
 ## 🧪 Testing Examples
 
@@ -451,56 +353,98 @@ curl -X POST http://localhost:8000/api/v1/auth/sign-in \
   }'
 ```
 
-### Get All Users (dengan token)
+### Get All Users
 
 ```bash
 curl -X GET http://localhost:8000/api/v1/users \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### Suspend User
+## 📊 Access Control Matrix
+
+| Action         | User | Mentor | Admin | SuperAdmin |
+| -------------- | ---- | ------ | ----- | ---------- |
+| Register       | ✅   | ✅     | ✅    | ✅         |
+| Login          | ✅   | ✅     | ✅    | ✅         |
+| View All Users | ❌   | ❌     | ✅    | ✅         |
+| Create User    | ❌   | ❌     | ✅    | ✅         |
+| Edit User      | ❌   | ❌     | ❌    | ✅         |
+| Delete User    | ❌   | ❌     | ❌    | ✅\*       |
+| Suspend User   | ❌   | ❌     | ✅    | ✅         |
+
+\*SuperAdmin tidak dapat menghapus akun mereka sendiri
+
+## 🏗️ Project Structure
+
+```
+rust-axum/
+├── src/
+│   ├── domain/           # Business logic & entities
+│   │   ├── entities/     # User, Role, UserStatus
+│   │   ├── repositories/ # Repository traits
+│   │   └── dtos/         # Data Transfer Objects
+│   ├── usecases/         # Application logic
+│   ├── handlers/         # HTTP handlers
+│   ├── infrastructure/   # External dependencies
+│   │   ├── database/
+│   │   ├── repositories/
+│   │   ├── auth/         # JWT, Password
+│   │   └── errors/
+│   ├── routes/           # Route configuration
+│   ├── utils/            # Helpers
+│   └── main.rs
+├── migrations/           # Database migrations
+├── Cargo.toml           # Dependencies
+├── Makefile             # Development scripts
+└── .env.example         # Environment template
+```
+
+## 🚨 Troubleshooting
+
+### Port Already in Use
 
 ```bash
-curl -X PATCH http://localhost:8000/api/v1/users/USER_ID/status \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "status": "Suspended"
-  }'
+# Cari process yang pakai port 8000
+lsof -i :8000
+
+# Kill process
+pkill -f rust-axum
+```
+
+### Database Connection Error
+
+```bash
+# Pastikan PostgreSQL running
+# MacOS
+brew services list
+
+# Linux
+sudo systemctl status postgresql
+
+# Windows
+# Check di Services atau pgAdmin
+```
+
+### cargo-watch Not Found
+
+```bash
+cargo install cargo-watch
 ```
 
 ## 🔒 Security Features
 
-1. ✅ **Password Hashing** - Argon2 algorithm
-2. ✅ **JWT Authentication** - HS256 signing
-3. ✅ **Email Uniqueness** - Database constraint
-4. ✅ **Role-Based Access Control** - Endpoint-level authorization
-5. ✅ **Input Validation** - Request validation dengan validator crate
-6. ✅ **Self-Deletion Prevention** - SuperAdmin tidak bisa hapus akun sendiri
-7. ✅ **Centralized Error Handling** - Konsisten error responses
+1. ✅ Password Hashing - Argon2
+2. ✅ JWT Authentication - HS256
+3. ✅ Email Uniqueness - Database constraint
+4. ✅ RBAC - Endpoint-level authorization
+5. ✅ Input Validation - Request validation
+6. ✅ Self-Deletion Prevention
+7. ✅ Centralized Error Handling
 
-## 📝 Error Responses
-
-Semua error menggunakan format yang konsisten:
-
-```json
-{
-  "meta": {
-    "status": "error",
-    "message": "Error message here"
-  }
-}
-```
-
-**Common Error Status Codes:**
-
-- `400` - Bad Request (validation error)
-- `401` - Unauthorized (invalid token)
-- `403` - Forbidden (insufficient permissions)
-- `404` - Not Found
-- `409` - Conflict (email already exists)
-- `500` - Internal Server Error
-
-## 📄 License
+## 📝 License
 
 MIT License
+
+---
+
+**Made with ❤️ using Rust + Axum**
