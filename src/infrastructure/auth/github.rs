@@ -21,9 +21,10 @@ impl GitHubOAuthClient {
 
     /// Returns the GitHub authorization URL to redirect the user to
     pub fn get_authorize_url(&self) -> String {
+        let encoded_redirect_uri = urlencoding::encode(&self.redirect_uri);
         format!(
             "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=user:email",
-            self.client_id, self.redirect_uri
+            self.client_id, encoded_redirect_uri
         )
     }
 

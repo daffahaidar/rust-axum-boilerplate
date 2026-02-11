@@ -30,3 +30,4 @@ time = "0.3.37"
 async-trait = "0.1.89"
 axum-extra = { version = "0.12.5", features = ["typed-header"] }
 reqwest = { version = "0.12", features = ["json"] }
+urlencoding = "2.1.3"

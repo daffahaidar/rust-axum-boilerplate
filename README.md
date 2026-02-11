@@ -222,6 +222,28 @@ To enable **Login with GitHub** and/or **Login with Google**, follow the steps b
 
 > **⚠️ IMPORTANT:** If the OAuth consent screen is still in **Testing** mode, only emails registered as test users can log in. To allow all users, publish the app to **Production** in the consent screen settings.
 
+#### 🔗 Using with a Frontend Framework (e.g. Next.js + better-auth)
+
+If you are integrating this backend with a **frontend application** (e.g. Next.js with better-auth), the OAuth callback URL must point to **your frontend**, not the Rust backend. The frontend will receive the authorization code, forward it to the Rust backend, set JWT cookies, and redirect the user.
+
+**Update the callback URLs as follows:**
+
+| Provider | Callback URL                                                    |
+| -------- | --------------------------------------------------------------- |
+| GitHub   | `http://localhost:3000/api/auth/oauth-callback?provider=github` |
+| Google   | `http://localhost:3000/api/auth/oauth-callback?provider=google` |
+
+Update your `.env`:
+
+```diff
+- GITHUB_REDIRECT_URI=http://localhost:8000/api/v1/auth/github/callback
++ GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/oauth-callback?provider=github
+- GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback
++ GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/oauth-callback?provider=google
+```
+
+> **📝 Note:** Make sure to also update the callback URLs in the GitHub Developer Settings and Google Cloud Console to match.
+
 ---
 
 ## 🔧 Development Commands

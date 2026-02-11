@@ -21,9 +21,10 @@ impl GoogleOAuthClient {
 
     /// Returns the Google authorization URL to redirect the user to
     pub fn get_authorize_url(&self) -> String {
+        let encoded_redirect_uri = urlencoding::encode(&self.redirect_uri);
         format!(
             "https://accounts.google.com/o/oauth2/v2/auth?client_id={}&redirect_uri={}&response_type=code&scope=openid%20email%20profile&access_type=offline",
-            self.client_id, self.redirect_uri
+            self.client_id, encoded_redirect_uri
         )
     }
 

@@ -222,6 +222,28 @@ Jika Anda ingin mengaktifkan fitur **Login with GitHub** dan/atau **Login with G
 
 > **⚠️ PENTING:** Jika OAuth consent screen masih dalam status **Testing**, hanya email yang didaftarkan sebagai test user yang bisa login. Untuk membuka akses ke semua user, publish app ke **Production** di consent screen settings.
 
+#### 🔗 Integrasi dengan Frontend (misal Next.js + better-auth)
+
+Jika Anda mengintegrasikan backend ini dengan **aplikasi frontend** (misal Next.js dengan better-auth), maka callback URL OAuth harus diarahkan ke **frontend Anda**, bukan ke Rust backend. Frontend akan menerima authorization code, meneruskannya ke Rust backend, menyimpan JWT cookies, dan redirect user ke dashboard.
+
+**Ubah callback URL menjadi:**
+
+| Provider | Callback URL                                                    |
+| -------- | --------------------------------------------------------------- |
+| GitHub   | `http://localhost:3000/api/auth/oauth-callback?provider=github` |
+| Google   | `http://localhost:3000/api/auth/oauth-callback?provider=google` |
+
+Update file `.env` Anda:
+
+```diff
+- GITHUB_REDIRECT_URI=http://localhost:8000/api/v1/auth/github/callback
++ GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/oauth-callback?provider=github
+- GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback
++ GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/oauth-callback?provider=google
+```
+
+> **📝 Note:** Pastikan juga untuk mengubah callback URL di GitHub Developer Settings dan Google Cloud Console agar sesuai.
+
 ---
 
 ## 🔧 Development Commands
